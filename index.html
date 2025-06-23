@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>🚂 Trajet - Cheminot LGW</title>
+  <title>🚂 Cheminot LGW</title>
   <style>
     /* Style Western Cheminot Années 1800 */
     body {
@@ -19,6 +19,37 @@
         linear-gradient(45deg, transparent 45%, rgba(122, 82, 48, 0.1) 45%, rgba(122, 82, 48, 0.1) 55%, transparent 55%),
         linear-gradient(-45deg, transparent 45%, rgba(122, 82, 48, 0.1) 45%, rgba(122, 82, 48, 0.1) 55%, transparent 55%);
       background-size: 30px 30px;
+    }
+
+    /* Menu de navigation */
+    .menu {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      padding: 10px 0;
+      background-color: #a96d2c;
+      border: 3px solid #7a5230;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px #7a5230aa;
+    }
+
+    .menu button {
+      background-color: #f8f1db;
+      color: #7a5230;
+      border: 2px solid #7a5230;
+      padding: 10px 16px;
+      font-size: 16px;
+      font-weight: bold;
+      font-family: 'Georgia', serif;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .menu button:hover {
+      background-color: #d6b25a;
+      color: #3e2f1c;
+      transform: scale(1.05);
     }
 
     h2 {
@@ -100,7 +131,6 @@
       border-left: 5px solid #a96d2c;
       padding-left: 14px;
       font-style: italic;
-      font-family: 'Georgia', serif;
     }
 
     #trajetComplet {
@@ -129,7 +159,6 @@
       user-select: none;
     }
 
-    /* Flex container for time + button */
     .time-container {
       display: flex;
       gap: 10px;
@@ -144,7 +173,6 @@
       padding: 12px 18px;
     }
 
-    /* Table for horaires section */
     #horaireTable {
       margin-top: 30px;
       width: 100%;
@@ -172,6 +200,15 @@
   </style>
 </head>
 <body>
+
+  <!-- Menu de navigation -->
+  <nav class="menu">
+    <button onclick="window.location.href='index.html'">🚉 inversé 1</button>
+    <button onclick="window.location.href='inverse-2.html'">🚉 inversé 2</button>
+    <button onclick="window.location.href='Express-US-NA.html'">🚉 Express US-NA</button>
+    <button onclick="window.location.href='Express-NA-US.html'">🚉 Express NA-US</button>
+  </nav>
+
   <h2>🛤️ Ligne Express - (US - NA) LGW</h2>
 
   <label for="start">🚉 Gare de départ :</label>
@@ -221,14 +258,10 @@
       "Wallace-Annesburg": 8.0,
       "Rhodes-Blackwater": 5.30,
       "Blackwater-Macfarlane Ranch": 4.30,
+      "Blackwater-Valentine": 3.30,
 
-      "Macfarlane Ranch-Manzanita": 1.30,
       "Macfarlane Ranch-Armadillo": 3.30,
       "Armadillo-Benedict": 3.22,
-      "Blackwater-Manzanita": 2.30,
-
-
-      "Blackwater-Valentine": 3.30,
 
       "Benedict-Tumbleweed": 2.20,
       "Tumbleweed-Armadillo": 4.75
@@ -329,7 +362,6 @@
           horaireActuel = ajouterMinutes(horaireActuel, pauseMinutes);
           totalTemps += pauseMinutes;
           texte += `<div class="step">⏸ Pause de ${pauseMinutes} min à <strong>${seg.fin}</strong> → 🕓 <span>${horaireActuel}</span></div>`;
-          // Update depart heure with pause added
           horaires[horaires.length - 1].depart = horaireActuel;
         }
       });
@@ -339,7 +371,6 @@
 
       document.getElementById("resultat").innerHTML = texte;
 
-      // Affichage du trajet complet avec horaires et "terminus"
       let trajetAvecHoraires = "Train Express de : ";
       for (let i = 0; i < horaires.length; i++) {
         const gare = horaires[i].gare;
@@ -351,20 +382,15 @@
       }
       document.getElementById("trajetComplet").innerText = trajetAvecHoraires;
 
-      // Affichage tableau horaires
       const tbody = document.querySelector("#horaireTable tbody");
       tbody.innerHTML = "";
       horaires.forEach(h => {
         const tr = document.createElement("tr");
-        const tdGare = document.createElement("td");
-        tdGare.textContent = h.gare;
-        const tdArrivee = document.createElement("td");
-        tdArrivee.textContent = h.arrivee === "-" ? "-" : h.arrivee;
-        const tdDepart = document.createElement("td");
-        tdDepart.textContent = h.depart === "-" ? "-" : h.depart;
-        tr.appendChild(tdGare);
-        tr.appendChild(tdArrivee);
-        tr.appendChild(tdDepart);
+        tr.innerHTML = `
+          <td>${h.gare}</td>
+          <td>${h.arrivee}</td>
+          <td>${h.depart}</td>
+        `;
         tbody.appendChild(tr);
       });
       document.getElementById("horaireTable").style.display = "table";
