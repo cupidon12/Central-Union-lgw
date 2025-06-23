@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>🚂 Trajet - Cheminot LGW</title>
+  <style>
+    /* Style Western Cheminot Années 1800 */
+    body {
+      font-family: 'Georgia', serif;
+      background: #f4efe6;
+      color: #3e2f1c;
+      padding: 40px;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 0 25px rgba(60, 40, 10, 0.7);
+      border-radius: 12px;
+      border: 5px solid #7a5230;
+      background-image:
+        linear-gradient(45deg, transparent 45%, rgba(122, 82, 48, 0.1) 45%, rgba(122, 82, 48, 0.1) 55%, transparent 55%),
+        linear-gradient(-45deg, transparent 45%, rgba(122, 82, 48, 0.1) 45%, rgba(122, 82, 48, 0.1) 55%, transparent 55%);
+      background-size: 30px 30px;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      text-align: center;
+      color: #7a5230;
+      text-shadow: 2px 2px 0 #d6b25a;
+      font-size: 2.8rem;
+      margin-bottom: 40px;
+      border-bottom: 3px solid #7a5230;
+      padding-bottom: 12px;
+    }
+
+    select, input[type="time"], button {
+      width: 100%;
+      padding: 12px 16px;
+      margin-top: 15px;
+      border-radius: 8px;
+      border: 2px solid #7a5230;
+      font-size: 18px;
+      background-color: #e4d8c4;
+      color: #3e2f1c;
+      box-shadow: inset 2px 2px 6px #c9b77b;
+      font-weight: 600;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      cursor: pointer;
+      font-family: 'Georgia', serif;
+    }
+
+    select:hover, input[type="time"]:hover {
+      background-color: #f8f1db;
+      border-color: #a96d2c;
+    }
+
+    button {
+      background-color: #a96d2c;
+      color: #f3e1a3;
+      font-weight: 900;
+      border: 3px solid #7a5230;
+      box-shadow: 3px 3px 0 #d6b25a;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    button:hover {
+      background-color: #7a5230;
+      border-color: #a96d2c;
+      color: #f8f1db;
+      box-shadow: 3px 3px 8px #d6b25a;
+    }
+
+    .result {
+      margin-top: 35px;
+      padding: 25px 20px;
+      background: #f0e7d7;
+      border: 3px solid #7a5230;
+      border-radius: 12px;
+      font-size: 16px;
+      color: #4a3a1a;
+      box-shadow: inset 0 0 12px #d6b25a;
+      white-space: pre-line;
+      font-family: 'Georgia', serif;
+      line-height: 1.6;
+    }
+
+    .result strong {
+      color: #a96d2c;
+      text-shadow: 1px 1px 0 #f8f1db;
+    }
+
+    .result span {
+      color: #7a5230;
+      font-weight: 600;
+    }
+
+    .step {
+      margin: 12px 0;
+      border-left: 5px solid #a96d2c;
+      padding-left: 14px;
+      font-style: italic;
+      font-family: 'Georgia', serif;
+    }
+
+    #trajetComplet {
+      margin-top: 30px;
+      padding: 14px 20px;
+      background-color: #f4e8c2;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      color: #7a5230;
+      user-select: all;
+      cursor: text;
+      border: 2px solid #a96d2c;
+      box-shadow: 0 0 10px #a96d2caa;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      font-size: 14px;
+      color: #8b6b38;
+      font-family: 'Georgia', serif;
+      font-style: italic;
+      letter-spacing: 1.1px;
+      user-select: none;
+    }
+
+    /* Flex container for time + button */
+    .time-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .time-container input[type="time"] {
+      flex: 1;
+    }
+
+    .time-container button {
+      width: auto;
+      padding: 12px 18px;
+    }
+
+    /* Table for horaires section */
+    #horaireTable {
+      margin-top: 30px;
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Georgia', serif;
+      color: #3e2f1c;
+    }
+
+    #horaireTable th, #horaireTable td {
+      border: 1px solid #7a5230;
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    #horaireTable th {
+      background-color: #a96d2c;
+      color: #f8f1db;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    #horaireTable tbody tr:nth-child(odd) {
+      background-color: #f4e8c2;
+    }
+  </style>
+</head>
+<body>
+  <h2>🛤️ Ligne Express - (US - NA) LGW</h2>
+
+  <label for="start">🚉 Gare de départ :</label>
+  <select id="start"></select>
+
+  <label for="end">🎯 Gare d’arrivée :</label>
+  <select id="end"></select>
+
+  <label for="heure">🕒 Heure de départ :</label>
+  <div class="time-container">
+    <input type="time" id="heure" value="08:00" />
+    <button type="button" onclick="definirHeureActuelle()">🕒 Maintenant</button>
+  </div>
+
+  <label for="pause">⏸️ Temps de pause (minutes) :</label>
+  <input type="number" id="pause" min="0" max="60" value="5" />
+
+  <button onclick="calculerTrajet()">📍 Calculer le trajet</button>
+
+  <div class="result" id="resultat"></div>
+  <div id="trajetComplet" title="Trajet complet - sélectionne et copie facilement"></div>
+
+  <table id="horaireTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Gare</th>
+        <th>Heure d’arrivée</th>
+        <th>Heure de départ</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <footer>
+    ⓒ 2025 - Conçu par <strong style="color: #7a5230;">Bill Anderson</strong> • Tous droits réservés.
+  </footer>
+
+  <script>
+    const trajets = {
+      "Annesburg-Saint Denis": 4.0,
+      "Saint Denis-Rhodes": 3.0,
+      "Rhodes-Valentine": 4.0,
+      "Valentine-Emerald Ranch": 3.0,
+      "Emerald Ranch-Saint Denis": 3.0,
+      "Rhodes-Riggs": 4.0,
+      "Riggs-Wallace": 2.0,
+      "Wallace-Annesburg": 8.0,
+      "Rhodes-Blackwater": 5.30,
+      "Blackwater-Macfarlane Ranch": 4.30,
+
+      "Macfarlane Ranch-Manzanita": 1.30,
+      "Macfarlane Ranch-Armadillo": 3.30,
+      "Armadillo-Benedict": 3.22,
+      "Blackwater-Manzanita": 2.30,
+
+
+      "Blackwater-Valentine": 3.30,
+
+      "Benedict-Tumbleweed": 2.20,
+      "Tumbleweed-Armadillo": 4.75
+    };
+
+    const gares = new Set();
+    Object.keys(trajets).forEach(k => {
+      const [a, b] = k.split("-");
+      gares.add(a.trim());
+      gares.add(b.trim());
+    });
+
+    const gareList = Array.from(gares).sort();
+    const startSelect = document.getElementById("start");
+    const endSelect = document.getElementById("end");
+
+    gareList.forEach(gare => {
+      startSelect.add(new Option(gare, gare));
+      endSelect.add(new Option(gare, gare));
+    });
+
+    function ajouterMinutes(heure, minutes) {
+      const [h, m] = heure.split(':').map(Number);
+      const date = new Date();
+      date.setHours(h, m + minutes);
+      const hh = String(date.getHours()).padStart(2, '0');
+      const mm = String(date.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
+
+    function trouverChemin(start, end, trajets, visited = new Set()) {
+      if (start === end) return [];
+
+      for (const [cle, temps] of trajets) {
+        const [debut, fin] = cle.split("-");
+        if (debut === start && !visited.has(cle)) {
+          visited.add(cle);
+          if (fin === end) {
+            return [{ debut, fin, temps }];
+          }
+          const suite = trouverChemin(fin, end, trajets, new Set(visited));
+          if (suite) {
+            return [{ debut, fin, temps }].concat(suite);
+          }
+        }
+      }
+      return null;
+    }
+
+    function definirHeureActuelle() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById("heure").value = `${hh}:${mm}`;
+    }
+
+    function calculerTrajet() {
+      const start = startSelect.value;
+      const end = endSelect.value;
+      const heureDepart = document.getElementById("heure").value;
+      const pauseMinutes = parseInt(document.getElementById("pause").value) || 5;
+
+      if (start === end) {
+        document.getElementById("resultat").innerText = "⛔ Départ et arrivée identiques.";
+        document.getElementById("trajetComplet").innerText = "";
+        document.getElementById("horaireTable").style.display = "none";
+        return;
+      }
+
+      const trajetPossible = Object.entries(trajets);
+      const chemin = trouverChemin(start, end, trajetPossible);
+
+      if (!chemin) {
+        document.getElementById("resultat").innerText = "❌ Aucun trajet possible trouvé.";
+        document.getElementById("trajetComplet").innerText = "";
+        document.getElementById("horaireTable").style.display = "none";
+        return;
+      }
+
+      let totalTemps = 0;
+      let horaireActuel = heureDepart;
+      let texte = `<strong>🧭 Départ :</strong> <span>${start}</span><br>`;
+      texte += `<strong>🕒 Heure de départ :</strong> <span>${heureDepart}</span><br><br>`;
+
+      const garesTrajet = [start];
+      const horaires = [];
+      horaires.push({ gare: start, arrivee: "-", depart: heureDepart });
+
+      chemin.forEach((seg, index) => {
+        totalTemps += seg.temps;
+        horaireActuel = ajouterMinutes(horaireActuel, seg.temps);
+        texte += `<div class="step">➡️ <strong>${seg.debut}</strong> → <strong>${seg.fin}</strong> : ${seg.temps.toFixed(2)} min → 🕓 <span>${horaireActuel}</span></div>`;
+
+        garesTrajet.push(seg.fin);
+        horaires.push({ gare: seg.fin, arrivee: horaireActuel, depart: horaireActuel });
+
+        if (index < chemin.length - 1) {
+          horaireActuel = ajouterMinutes(horaireActuel, pauseMinutes);
+          totalTemps += pauseMinutes;
+          texte += `<div class="step">⏸ Pause de ${pauseMinutes} min à <strong>${seg.fin}</strong> → 🕓 <span>${horaireActuel}</span></div>`;
+          // Update depart heure with pause added
+          horaires[horaires.length - 1].depart = horaireActuel;
+        }
+      });
+
+      texte += `<br><strong>⏱️ Temps total :</strong> <span>${Math.floor(totalTemps)} min</span><br>`;
+      texte += `<strong>📍 Arrivée finale :</strong> <span>${horaireActuel}</span>`;
+
+      document.getElementById("resultat").innerHTML = texte;
+
+      // Affichage du trajet complet avec horaires et "terminus"
+      let trajetAvecHoraires = "Train Express de : ";
+      for (let i = 0; i < horaires.length; i++) {
+        const gare = horaires[i].gare;
+        if (i === horaires.length - 1) {
+          trajetAvecHoraires += `${gare} terminus`;
+        } else {
+          trajetAvecHoraires += `${gare} ${horaires[i].arrivee !== "-" ? horaires[i].arrivee : horaires[i].depart} → `;
+        }
+      }
+      document.getElementById("trajetComplet").innerText = trajetAvecHoraires;
+
+      // Affichage tableau horaires
+      const tbody = document.querySelector("#horaireTable tbody");
+      tbody.innerHTML = "";
+      horaires.forEach(h => {
+        const tr = document.createElement("tr");
+        const tdGare = document.createElement("td");
+        tdGare.textContent = h.gare;
+        const tdArrivee = document.createElement("td");
+        tdArrivee.textContent = h.arrivee === "-" ? "-" : h.arrivee;
+        const tdDepart = document.createElement("td");
+        tdDepart.textContent = h.depart === "-" ? "-" : h.depart;
+        tr.appendChild(tdGare);
+        tr.appendChild(tdArrivee);
+        tr.appendChild(tdDepart);
+        tbody.appendChild(tr);
+      });
+      document.getElementById("horaireTable").style.display = "table";
+    }
+  </script>
+</body>
+</html>
