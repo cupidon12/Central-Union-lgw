@@ -4,13 +4,12 @@
   <meta charset="UTF-8" />
   <title>🚂 Cheminot LGW</title>
   <style>
-    /* (le style reste inchangé, je le conserve tel quel) */
     body {
       font-family: 'Georgia', serif;
       background: #f4efe6;
       color: #3e2f1c;
       padding: 40px;
-      max-width: 750px;
+      max-width: 900px;
       margin: auto;
       box-shadow: 0 0 25px rgba(60, 40, 10, 0.7);
       border-radius: 12px;
@@ -29,13 +28,22 @@
       font-size: 16px;
     }
 
-    input, select {
+    input[type="time"], select {
       width: 100%;
       padding: 8px;
       border-radius: 6px;
       border: 2px solid #7a5230;
       background-color: #fff8e1;
       font-family: 'Georgia', serif;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 2px solid #7a5230;
+      font-family: 'Georgia', serif;
+      font-size: 16px;
     }
 
     table {
@@ -57,6 +65,7 @@
       font-family: 'Courier New', monospace;
       font-size: 16px;
       transition: background-color 0.3s, color 0.3s;
+      vertical-align: middle;
     }
 
     th {
@@ -176,7 +185,6 @@
       color: #bbb;
     }
 
-    /* Bouton mode nuit */
     #btnModeNuit {
       position: fixed;
       top: 20px;
@@ -212,22 +220,28 @@
 
   <label for="selectLigne">Choisir une ligne :</label>
   <select id="selectLigne" onchange="afficherTableau()">
-    <option value="ligne1">Ligne 1 – Saint Denis → Annesburg → Wallace → Armadillo</option>
-    <option value="ligne2">Ligne 2 – Armadillo → Wallace → Annesburg → Saint Denis</option>
-    <option value="ligne3">Ligne 3 – Annesburg → Saint Denis → Armadillo → Tumbleweed → Armadillo</option>
-    <option value="ligne4">Ligne 4 – Armadillo → Tumbleweed → Armadillo → Saint Denis → Annesburg</option>
+    <option value="ligne1">Ligne 1 – Saint Denis → Annesburg → Bacchus → Wallace → Riggs → Blackwater → Macfarlane Ranch → Armadillo</option>
+    <option value="ligne2">Ligne 2 – Armadillo → Macfarlane Ranch → Blackwater → Riggs → Wallace → Bacchus → Annesburg → Saint Denis</option>
+    <option value="ligne3">Ligne 3 – Annesburg → Saint Denis → Rhodes → Blackwater → Macfarlane Ranch → Armadillo → Benedict → Tumbleweed → Armadillo</option>
+    <option value="ligne4">Ligne 4 – Armadillo → Tumbleweed → Benedict → Armadillo → Macfarlane Ranch → Blackwater → Rhodes → Saint Denis → Annesburg</option>
   </select>
 
   <label for="heureDepart">Heure de départ (HH:MM) :</label>
   <input type="time" id="heureDepart" value="08:00" onchange="afficherTableau()" />
 
+  <label for="pauseStandard">Temps de pause standard (minutes) :</label>
+  <input type="number" id="pauseStandard" value="3" min="0" max="30" onchange="afficherTableau()" />
+
   <div id="resumeTrajet">
-    <h3>🕒 Tableau horaire :</h3>
+    <h3>🕒 Tableau horaire détaillé :</h3>
     <table id="tableauHoraires">
       <thead>
         <tr>
           <th>Gare</th>
-          <th>Heure de passage</th>
+          <th>Heure d'arrivée</th>
+          <th>Temps de pause (min)</th>
+          <th>Heure de départ</th>
+          <th>Temps vers gare suivante (min)</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -239,7 +253,6 @@
   <div id="prochaineGareInfo"></div>
 
   <script>
-    // Mode nuit - gestion du bouton et sauvegarde localStorage
     const btnModeNuit = document.getElementById('btnModeNuit');
     const body = document.body;
 
@@ -256,19 +269,14 @@
     }
 
     btnModeNuit.addEventListener('click', () => {
-      const estNuit = body.classList.contains('mode-nuit');
-      appliquerModeNuit(!estNuit);
+      appliquerModeNuit(!body.classList.contains('mode-nuit'));
     });
 
-    // Au chargement, applique le mode nuit si déjà choisi
     window.onload = () => {
       const modeNuitStocke = localStorage.getItem('modeNuit') === 'true';
       appliquerModeNuit(modeNuitStocke);
       afficherTableau();
     };
-
-    // -------------------------------------------------------
-    // Ton script horaire
 
     const lignes = {
       ligne1: {
@@ -328,118 +336,233 @@
       return Math.round(temps);
     }
 
-    // Ajoute des minutes à un horaire au format "HH:MM"
+    // Ajoute des minutes à un horaire "HH:MM"
     function ajouterMinutes(hhmm, minutes) {
       let [h, m] = hhmm.split(":").map(Number);
       m += minutes;
       h += Math.floor(m / 60);
       m = m % 60;
       h = h % 24;
-      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     }
 
     // Convertit un horaire "HH:MM" en minutes depuis minuit
     function horaireEnMinutes(hhmm) {
-      let [h, m] = hhmm.split(":").map(Number);
-      return h * 60 + m;
+      let [h,m] = hhmm.split(":").map(Number);
+      return h*60 + m;
     }
 
-    // Affiche le tableau horaires selon la ligne et l'heure départ
+    // Affiche le tableau horaires détaillé
     function afficherTableau() {
       const select = document.getElementById("selectLigne");
       const heureDepart = document.getElementById("heureDepart").value || "08:00";
-      const ligneChoisie = select.value;
-      const gares = lignes[ligneChoisie].gares;
-
+      const pauseStandard = parseInt(document.getElementById("pauseStandard").value) || 0;
       const tbody = document.querySelector("#tableauHoraires tbody");
       tbody.innerHTML = "";
 
-      let heureActuelleTrajet = heureDepart;
-      // Construire tableau horaires
-      for (let i = 0; i < gares.length; i++) {
-        const gare = gares[i];
-        let tr = document.createElement("tr");
-        tr.innerHTML = `<td>${gare.nom}</td><td>${heureActuelleTrajet}</td>`;
-        tbody.appendChild(tr);
-        if (gare.tempsVersSuivant) {
-          heureActuelleTrajet = ajouterMinutes(heureActuelleTrajet, tempsEnMinutes(gare.tempsVersSuivant));
+      const ligne = lignes[select.value];
+      if (!ligne) return;
+
+      let heureArrivee = heureDepart;
+      let horaires = [];
+
+      for (let i = 0; i < ligne.gares.length; i++) {
+        const gare = ligne.gares[i];
+
+        // Heure d'arrivée est heure de départ précédente + temps trajet
+        if (i > 0) {
+          let tempsTrajet = tempsEnMinutes(ligne.gares[i-1].tempsVersSuivant);
+          heureArrivee = ajouterMinutes(horaires[i-1].heureDepart, tempsTrajet);
         }
+
+        // Temps de pause (ici on applique pause standard)
+        const pause = pauseStandard;
+
+        // Heure de départ = heure d'arrivée + pause
+        const heureDepartGare = ajouterMinutes(heureArrivee, pause);
+
+        // Temps trajet vers gare suivante
+        const tempsTrajetVersSuiv = (gare.tempsVersSuivant > 0) ? tempsEnMinutes(gare.tempsVersSuivant) : "-";
+
+        horaires.push({
+          gare: gare.nom,
+          heureArrivee,
+          pause,
+          heureDepart: heureDepartGare,
+          tempsTrajet: tempsTrajetVersSuiv
+        });
       }
 
-      // Afficher heure actuelle + prochaine gare
-      afficherHeureActuelleEtProchaineGare(gares, heureDepart);
+      // Génère les lignes du tableau
+      horaires.forEach((h, idx) => {
+        const tr = document.createElement("tr");
+
+        if (idx === 0) {
+          // Première gare, arrivée = départ initial
+          tr.innerHTML = `
+            <td>${h.gare}</td>
+            <td>-</td>
+            <td><input type="number" min="0" max="60" value="${h.pause}" data-index="${idx}" class="inputPause" /></td>
+            <td>${h.heureDepart}</td>
+            <td>${h.tempsTrajet !== "-" ? h.tempsTrajet + ' min' : '-'}</td>
+          `;
+        } else {
+          tr.innerHTML = `
+            <td>${h.gare}</td>
+            <td>${h.heureArrivee}</td>
+            <td><input type="number" min="0" max="60" value="${h.pause}" data-index="${idx}" class="inputPause" /></td>
+            <td>${h.heureDepart}</td>
+            <td>${h.tempsTrajet !== "-" ? h.tempsTrajet + ' min' : '-'}</td>
+          `;
+        }
+
+        tbody.appendChild(tr);
+      });
+
+      // Ajout gestion modification pauses individuelles
+      const inputsPause = document.querySelectorAll('.inputPause');
+      inputsPause.forEach(input => {
+        input.addEventListener('change', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          let val = parseInt(e.target.value);
+          if (isNaN(val) || val < 0) val = 0;
+          if (val > 60) val = 60;
+          e.target.value = val;
+          // Mise à jour des horaires avec pause modifiée
+          mettreAJourHorairesAvecPause(horaires, idx, val);
+        });
+      });
+
+      afficherHeureActuelleEtProchaineGare(horaires);
     }
 
-    // Affiche heure système, prochaine gare à venir et temps restant
-    function afficherHeureActuelleEtProchaineGare(gares, heureDepart) {
-      const maintenant = new Date();
-      const heureSys = maintenant.toTimeString().slice(0,5);
+    function mettreAJourHorairesAvecPause(horaires, indexModif, nouvellePause) {
+      // Recalcule tous les horaires à partir de l'index modifié en mettant à jour la pause de la gare modifiée
 
-      document.getElementById("heureActuelle").textContent = "Heure actuelle : " + heureSys;
+      const select = document.getElementById("selectLigne");
+      const ligne = lignes[select.value];
+      if (!ligne) return;
 
-      // Calculer temps passages des gares à partir de l'heure départ
-      let passageGares = [];
-      let cumulMinutes = horaireEnMinutes(heureDepart);
+      // On reconstruit un tableau local pour recalculer horaires
+      // Garder heure d'arrivée et pause en début
+      let heureArrivee = horaires[0].heureDepart; // heure départ initial
 
-      for (let i=0; i<gares.length; i++) {
-        passageGares.push({nom: gares[i].nom, minutes: cumulMinutes});
-        cumulMinutes += tempsEnMinutes(gares[i].tempsVersSuivant);
+      // Si c'est la première gare, pause change mais pas d'heure arrivée
+      if (indexModif === 0) {
+        horaires[0].pause = nouvellePause;
+        horaires[0].heureDepart = ajouterMinutes(horaires[0].heureDepart, nouvellePause - parseInt(document.querySelectorAll('.inputPause')[0].value));
       }
 
-      // Trouver la prochaine gare par rapport à l'heure actuelle (en minutes)
-      const heureActuelleMin = maintenant.getHours() * 60 + maintenant.getMinutes();
+      // Recalcule depuis la gare modifiée jusqu'à la fin
+      for (let i = 0; i < horaires.length; i++) {
+        if (i === 0) {
+          // 1ère gare, pas d'heure arrivée (départ initial)
+          horaires[i].heureArrivee = "-";
+          // pause à jour si c'est cette gare
+          if (i === indexModif) horaires[i].pause = nouvellePause;
+          horaires[i].heureDepart = ajouterMinutes(document.getElementById('heureDepart').value, horaires[i].pause);
+          continue;
+        }
 
-      let prochaine = null;
-      for (let i=0; i<passageGares.length; i++) {
-        if (passageGares[i].minutes >= heureActuelleMin) {
-          prochaine = passageGares[i];
+        // Heure d'arrivée = heure départ de la gare précédente + temps trajet
+        const tempsTrajet = tempsEnMinutes(ligne.gares[i - 1].tempsVersSuivant);
+        horaires[i].heureArrivee = ajouterMinutes(horaires[i - 1].heureDepart, tempsTrajet);
+
+        // Pause modifiée si c'est la gare modifiée, sinon garder pause précédente
+        if (i === indexModif) {
+          horaires[i].pause = nouvellePause;
+        }
+
+        // Heure départ = heure arrivée + pause
+        horaires[i].heureDepart = ajouterMinutes(horaires[i].heureArrivee, horaires[i].pause);
+      }
+
+      // Met à jour le tableau visuel
+      const tbody = document.querySelector("#tableauHoraires tbody");
+      tbody.innerHTML = "";
+
+      horaires.forEach((h, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${h.gare}</td>
+          <td>${h.heureArrivee === "-" ? "-" : h.heureArrivee}</td>
+          <td><input type="number" min="0" max="60" value="${h.pause}" data-index="${idx}" class="inputPause" /></td>
+          <td>${h.heureDepart}</td>
+          <td>${h.tempsTrajet !== "-" ? h.tempsTrajet + ' min' : '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Rerattache l'événement sur les nouveaux inputs
+      const inputsPause = document.querySelectorAll('.inputPause');
+      inputsPause.forEach(input => {
+        input.addEventListener('change', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          let val = parseInt(e.target.value);
+          if (isNaN(val) || val < 0) val = 0;
+          if (val > 60) val = 60;
+          e.target.value = val;
+          mettreAJourHorairesAvecPause(horaires, idx, val);
+        });
+      });
+
+      afficherHeureActuelleEtProchaineGare(horaires);
+    }
+
+    // Fonction copie tableau au format texte
+function copierTableau() {
+  const rows = document.querySelectorAll("#tableauHoraires tbody tr");
+  let texte = "Train de : ";
+  rows.forEach((row, index) => {
+    const gare = row.cells[0].textContent;
+    const heure = row.cells[1].textContent;
+    if (index === rows.length - 1) {
+      texte += `${gare} terminus`;
+    } else {
+      texte += `${gare} ${heure} → `;
+    }
+  });
+  navigator.clipboard.writeText(texte).then(() => {
+    alert("Horaires copiés dans le presse-papier !");
+  }).catch(() => {
+    alert("Échec de la copie.");
+  });
+}
+
+
+
+    // Affiche heure actuelle et prochaine gare en fonction de l'heure système
+    function afficherHeureActuelleEtProchaineGare(horaires) {
+      const now = new Date();
+      const heureAct = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      document.getElementById("heureActuelle").textContent = `Heure actuelle : ${heureAct}`;
+
+      // Trouver la prochaine gare où on sera après l'heure actuelle
+      const nowMinutes = horaireEnMinutes(heureAct);
+      let prochaineGare = null;
+
+      for (let i=0; i<horaires.length; i++) {
+        const depMinutes = horaireEnMinutes(horaires[i].heureDepart);
+        if (depMinutes > nowMinutes) {
+          prochaineGare = horaires[i];
           break;
         }
       }
 
-      // Marquer la ligne dans le tableau
-      const trs = document.querySelectorAll("#tableauHoraires tbody tr");
-      trs.forEach(tr => tr.classList.remove("prochaine-gare"));
-      if (prochaine) {
-        for (let tr of trs) {
-          if (tr.firstChild.textContent === prochaine.nom) {
-            tr.classList.add("prochaine-gare");
-            break;
-          }
-        }
-
-        // Afficher le temps restant
-        let diff = prochaine.minutes - heureActuelleMin;
-        const heuresRestantes = Math.floor(diff / 60);
-        const minutesRestantes = diff % 60;
-
-        let texteTempsRestant = "";
-        if (diff > 0) {
-          texteTempsRestant = `Prochaine gare : ${prochaine.nom}, dans ${heuresRestantes > 0 ? heuresRestantes + "h " : ""}${minutesRestantes} min.`;
-        } else {
-          texteTempsRestant = `Train à la gare ${prochaine.nom} maintenant.`;
-        }
-        document.getElementById("prochaineGareInfo").textContent = texteTempsRestant;
+      const infoDiv = document.getElementById("prochaineGareInfo");
+      if (prochaineGare) {
+        infoDiv.textContent = `Prochaine gare : ${prochaineGare.gare}, départ à ${prochaineGare.heureDepart}`;
+        // Met en évidence la ligne de la prochaine gare
+        const rows = document.querySelectorAll("#tableauHoraires tbody tr");
+        rows.forEach(row => row.classList.remove("prochaine-gare"));
+        const idx = horaires.findIndex(h => h.gare === prochaineGare.gare);
+        if (rows[idx]) rows[idx].classList.add("prochaine-gare");
       } else {
-        document.getElementById("prochaineGareInfo").textContent = "Le train est arrivé à destination.";
+        infoDiv.textContent = `Le train a terminé son trajet ou n'a pas encore commencé.`;
+        const rows = document.querySelectorAll("#tableauHoraires tbody tr");
+        rows.forEach(row => row.classList.remove("prochaine-gare"));
       }
-    }
-
-    // Copier le tableau des horaires dans le presse-papiers
-    function copierTableau() {
-      const lignesTableau = [];
-      const trs = document.querySelectorAll("#tableauHoraires tbody tr");
-      trs.forEach(tr => {
-        const gare = tr.children[0].textContent;
-        const heure = tr.children[1].textContent;
-        lignesTableau.push(`${gare} — ${heure}`);
-      });
-      const texteCopie = lignesTableau.join("\n");
-      navigator.clipboard.writeText(texteCopie)
-        .then(() => alert("Horaires copiés dans le presse-papiers !"))
-        .catch(() => alert("Erreur lors de la copie."));
     }
   </script>
 </body>
 </html>
-
