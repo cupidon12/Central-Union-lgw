@@ -1,1 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>🚂 Cheminot LGW</title>
+  <style>
+    /* (le style reste inchangé, je le conserve tel quel) */
+    body {
+      font-family: 'Georgia', serif;
+      background: #f4efe6;
+      color: #3e2f1c;
+      padding: 40px;
+      max-width: 750px;
+      margin: auto;
+      box-shadow: 0 0 25px rgba(60, 40, 10, 0.7);
+      border-radius: 12px;
+      border: 5px solid #7a5230;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h2 {
+      text-align: center;
+      color: #7a5230;
+    }
+
+    label, input, select {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 2px solid #7a5230;
+      background-color: #fff8e1;
+      font-family: 'Georgia', serif;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fdf3d0;
+      border: 2px solid #7a5230;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(60, 40, 10, 0.3);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    th, td {
+      border-bottom: 1px solid #c79d70;
+      padding: 12px;
+      text-align: left;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    th {
+      background-color: #7a5230;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fbeac2;
+    }
+
+    tr:hover {
+      background-color: #f6dca8;
+    }
+
+    td:first-child {
+      font-weight: bold;
+    }
+
+    tr:first-child td,
+    tr:last-child td {
+      color: #3e2f1c;
+      font-weight: 700;
+    }
+
+    tr.prochaine-gare {
+      background-color: #a2d5f2 !important;
+      font-weight: bold;
+      color: #064273;
+      transition: background-color 0.5s ease;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 8px 14px;
+      background-color: #a96d2c;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+
+    #heureActuelle {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #7a5230;
+    }
+
+    #prochaineGareInfo {
+      text-align: center;
+      font-size: 16px;
+      margin-top: 8px;
+      font-style: italic;
+      color: #555;
+    }
+
+    /* Mode nuit */
+    body.mode-nuit {
+      background: #121212;
+      color: #e0e0e0;
+      border-color: #444;
+      box-shadow: 0 0 30px rgba(0, 150, 255, 0.7);
+    }
+
+    body.mode-nuit h2 {
+      color: #90caf9;
+    }
+
+    body.mode-nuit input,
+    body.mode-nuit select {
+      background-color: #333;
+      border-color: #90caf9;
+      color: #e0e0e0;
+    }
+
+    body.mode-nuit table {
+      background-color: #1e1e1e;
+      border-color: #90caf9;
+      color: #e0e0e0;
+      box-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+    }
+
+    body.mode-nuit th {
+      background-color: #0d47a1;
+      color: #bbdefb;
+    }
+
+    body.mode-nuit tr:nth-child(even) {
+      background-color: #222;
+    }
+
+    body.mode-nuit tr:hover {
+      background-color: #333;
+    }
+
+    body.mode-nuit tr.prochaine-gare {
+      background-color: #1565c0 !important;
+      color: #bbdefb;
+    }
+
+    body.mode-nuit button {
+      background-color: #1976d2;
+      color: white;
+    }
+
+    body.mode-nuit #heureActuelle {
+      color: #90caf9;
+    }
+
+    body.mode-nuit #prochaineGareInfo {
+      color: #bbb;
+    }
+
+    /* Bouton mode nuit */
+    #btnModeNuit {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 16px;
+      background-color: #7a5230;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      z-index: 999;
+    }
+
+    #btnModeNuit:hover {
+      background-color: #a96d2c;
+    }
+
+    body.mode-nuit #btnModeNuit {
+      background-color: #1976d2;
+    }
+
+    body.mode-nuit #btnModeNuit:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <button id="btnModeNuit">Mode Nuit</button>
+
+  <h2>🛤️ Cheminot LGW 🚂</h2>
+
+  <label for="selectLigne">Choisir une ligne :</label>
+  <select id="selectLigne" onchange="afficherTableau()">
+    <option value="ligne1">Ligne 1 – Saint Denis → Annesburg → Wallace → Armadillo</option>
+    <option value="ligne2">Ligne 2 – Armadillo → Wallace → Annesburg → Saint Denis</option>
+    <option value="ligne3">Ligne 3 – Annesburg → Saint Denis → Armadillo → Tumbleweed → Armadillo</option>
+    <option value="ligne4">Ligne 4 – Armadillo → Tumbleweed → Armadillo → Saint Denis → Annesburg</option>
+  </select>
+
+  <label for="heureDepart">Heure de départ (HH:MM) :</label>
+  <input type="time" id="heureDepart" value="08:00" onchange="afficherTableau()" />
+
+  <div id="resumeTrajet">
+    <h3>🕒 Tableau horaire :</h3>
+    <table id="tableauHoraires">
+      <thead>
+        <tr>
+          <th>Gare</th>
+          <th>Heure de passage</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="copierTableau()">📎 Copier les horaires</button>
+  </div>
+
+  <div id="heureActuelle"></div>
+  <div id="prochaineGareInfo"></div>
+
+  <script>
+    // Mode nuit - gestion du bouton et sauvegarde localStorage
+    const btnModeNuit = document.getElementById('btnModeNuit');
+    const body = document.body;
+
+    function appliquerModeNuit(active) {
+      if (active) {
+        body.classList.add('mode-nuit');
+        btnModeNuit.textContent = 'Mode Clair';
+        localStorage.setItem('modeNuit', 'true');
+      } else {
+        body.classList.remove('mode-nuit');
+        btnModeNuit.textContent = 'Mode Nuit';
+        localStorage.setItem('modeNuit', 'false');
+      }
+    }
+
+    btnModeNuit.addEventListener('click', () => {
+      const estNuit = body.classList.contains('mode-nuit');
+      appliquerModeNuit(!estNuit);
+    });
+
+    // Au chargement, applique le mode nuit si déjà choisi
+    window.onload = () => {
+      const modeNuitStocke = localStorage.getItem('modeNuit') === 'true';
+      appliquerModeNuit(modeNuitStocke);
+      afficherTableau();
+    };
+
+    // -------------------------------------------------------
+    // Ton script horaire
+
+    const lignes = {
+      ligne1: {
+        gares: [
+          { nom: "Saint Denis", tempsVersSuivant: 4.37 },
+          { nom: "Annesburg", tempsVersSuivant: 5.20 },
+          { nom: "Bacchus", tempsVersSuivant: 4.00 },
+          { nom: "Wallace", tempsVersSuivant: 4.50 },
+          { nom: "Riggs", tempsVersSuivant: 2.00 },
+          { nom: "Blackwater", tempsVersSuivant: 3.48 },
+          { nom: "Macfarlane Ranch", tempsVersSuivant: 3.37 },
+          { nom: "Armadillo", tempsVersSuivant: 0 }
+        ]
+      },
+      ligne2: {
+        gares: [
+          { nom: "Armadillo", tempsVersSuivant: 3.37 },
+          { nom: "Macfarlane Ranch", tempsVersSuivant: 3.48 },
+          { nom: "Blackwater", tempsVersSuivant: 2.00 },
+          { nom: "Riggs", tempsVersSuivant: 4.50 },
+          { nom: "Wallace", tempsVersSuivant: 4.00 },
+          { nom: "Bacchus", tempsVersSuivant: 5.20 },
+          { nom: "Annesburg", tempsVersSuivant: 4.37 },
+          { nom: "Saint Denis", tempsVersSuivant: 0 }
+        ]
+      },
+      ligne3: {
+        gares: [
+          { nom: "Annesburg", tempsVersSuivant: 4.0 },
+          { nom: "Saint Denis", tempsVersSuivant: 3.0 },
+          { nom: "Rhodes", tempsVersSuivant: 5.30 },
+          { nom: "Blackwater", tempsVersSuivant: 4.30 },
+          { nom: "Macfarlane Ranch", tempsVersSuivant: 3.30 },
+          { nom: "Armadillo", tempsVersSuivant: 3.22 },
+          { nom: "Benedict", tempsVersSuivant: 2.20 },
+          { nom: "Tumbleweed", tempsVersSuivant: 4.75 },
+          { nom: "Armadillo", tempsVersSuivant: 0 }
+        ]
+      },
+      ligne4: {
+        gares: [
+          { nom: "Armadillo", tempsVersSuivant: 4.75 },
+          { nom: "Tumbleweed", tempsVersSuivant: 2.20 },
+          { nom: "Benedict", tempsVersSuivant: 3.22 },
+          { nom: "Armadillo", tempsVersSuivant: 3.30 },
+          { nom: "Macfarlane Ranch", tempsVersSuivant: 4.30 },
+          { nom: "Blackwater", tempsVersSuivant: 5.30 },
+          { nom: "Rhodes", tempsVersSuivant: 3.00 },
+          { nom: "Saint Denis", tempsVersSuivant: 4.00 },
+          { nom: "Annesburg", tempsVersSuivant: 0 }
+        ]
+      }
+    };
+
+    // Convertit un temps décimal en minutes entières (arrondi)
+    function tempsEnMinutes(temps) {
+      return Math.round(temps);
+    }
+
+    // Ajoute des minutes à un horaire au format "HH:MM"
+    function ajouterMinutes(hhmm, minutes) {
+      let [h, m] = hhmm.split(":").map(Number);
+      m += minutes;
+      h += Math.floor(m / 60);
+      m = m % 60;
+      h = h % 24;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    // Convertit un horaire "HH:MM" en minutes depuis minuit
+    function horaireEnMinutes(hhmm) {
+      let [h, m] = hhmm.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    // Affiche le tableau horaires selon la ligne et l'heure départ
+    function afficherTableau() {
+      const select = document.getElementById("selectLigne");
+      const heureDepart = document.getElementById("heureDepart").value || "08:00";
+      const ligneChoisie = select.value;
+      const gares = lignes[ligneChoisie].gares;
+
+      const tbody = document.querySelector("#tableauHoraires tbody");
+      tbody.innerHTML = "";
+
+      let heureActuelleTrajet = heureDepart;
+      // Construire tableau horaires
+      for (let i = 0; i < gares.length; i++) {
+        const gare = gares[i];
+        let tr = document.createElement("tr");
+        tr.innerHTML = `<td>${gare.nom}</td><td>${heureActuelleTrajet}</td>`;
+        tbody.appendChild(tr);
+        if (gare.tempsVersSuivant) {
+          heureActuelleTrajet = ajouterMinutes(heureActuelleTrajet, tempsEnMinutes(gare.tempsVersSuivant));
+        }
+      }
+
+      // Afficher heure actuelle + prochaine gare
+      afficherHeureActuelleEtProchaineGare(gares, heureDepart);
+    }
+
+    // Affiche heure système, prochaine gare à venir et temps restant
+    function afficherHeureActuelleEtProchaineGare(gares, heureDepart) {
+      const maintenant = new Date();
+      const heureSys = maintenant.toTimeString().slice(0,5);
+
+      document.getElementById("heureActuelle").textContent = "Heure actuelle : " + heureSys;
+
+      // Calculer temps passages des gares à partir de l'heure départ
+      let passageGares = [];
+      let cumulMinutes = horaireEnMinutes(heureDepart);
+
+      for (let i=0; i<gares.length; i++) {
+        passageGares.push({nom: gares[i].nom, minutes: cumulMinutes});
+        cumulMinutes += tempsEnMinutes(gares[i].tempsVersSuivant);
+      }
+
+      // Trouver la prochaine gare par rapport à l'heure actuelle (en minutes)
+      const heureActuelleMin = maintenant.getHours() * 60 + maintenant.getMinutes();
+
+      let prochaine = null;
+      for (let i=0; i<passageGares.length; i++) {
+        if (passageGares[i].minutes >= heureActuelleMin) {
+          prochaine = passageGares[i];
+          break;
+        }
+      }
+
+      // Marquer la ligne dans le tableau
+      const trs = document.querySelectorAll("#tableauHoraires tbody tr");
+      trs.forEach(tr => tr.classList.remove("prochaine-gare"));
+      if (prochaine) {
+        for (let tr of trs) {
+          if (tr.firstChild.textContent === prochaine.nom) {
+            tr.classList.add("prochaine-gare");
+            break;
+          }
+        }
+
+        // Afficher le temps restant
+        let diff = prochaine.minutes - heureActuelleMin;
+        const heuresRestantes = Math.floor(diff / 60);
+        const minutesRestantes = diff % 60;
+
+        let texteTempsRestant = "";
+        if (diff > 0) {
+          texteTempsRestant = `Prochaine gare : ${prochaine.nom}, dans ${heuresRestantes > 0 ? heuresRestantes + "h " : ""}${minutesRestantes} min.`;
+        } else {
+          texteTempsRestant = `Train à la gare ${prochaine.nom} maintenant.`;
+        }
+        document.getElementById("prochaineGareInfo").textContent = texteTempsRestant;
+      } else {
+        document.getElementById("prochaineGareInfo").textContent = "Le train est arrivé à destination.";
+      }
+    }
+
+    // Copier le tableau des horaires dans le presse-papiers
+    function copierTableau() {
+      const lignesTableau = [];
+      const trs = document.querySelectorAll("#tableauHoraires tbody tr");
+      trs.forEach(tr => {
+        const gare = tr.children[0].textContent;
+        const heure = tr.children[1].textContent;
+        lignesTableau.push(`${gare} — ${heure}`);
+      });
+      const texteCopie = lignesTableau.join("\n");
+      navigator.clipboard.writeText(texteCopie)
+        .then(() => alert("Horaires copiés dans le presse-papiers !"))
+        .catch(() => alert("Erreur lors de la copie."));
+    }
+  </script>
+</body>
+</html>
 
