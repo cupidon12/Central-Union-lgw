@@ -211,6 +211,17 @@
     body.mode-nuit #btnModeNuit:hover {
       background-color: #1565c0;
     }
+
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      font-size: 14px;
+      color: #8b6b38;
+      font-family: 'Georgia', serif;
+      font-style: italic;
+      letter-spacing: 1.1px;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -523,7 +534,7 @@ function copierTableau() {
     }
   });
   navigator.clipboard.writeText(texte).then(() => {
-    alert("Horaires copiés dans le presse-papier !");
+    alert("« Horaires copiés — Colle-les dans Cheminot Run LGW et dans Horaires IG ! »");
   }).catch(() => {
     alert("Échec de la copie.");
   });
@@ -564,5 +575,10 @@ function copierTableau() {
       }
     }
   </script>
+<div id="popup" style="display:none; position: fixed; top: 20px; right: 20px; background: #a96d2c; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 1000;"></div>
+
 </body>
 </html>
+  <footer>
+    ⓒ 2025 - Conçu par <strong style="color: #7a5230;">Bill Anderson</strong> • Tous droits réservés.
+  </footer>
