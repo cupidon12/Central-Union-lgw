@@ -1,3 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>🚂 Cheminot LGW</title>
+
+<link rel="stylesheet" href="styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Almendra+SC&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+
+</head>
+<body>
+  <button id="btnModeNuit">Mode Nuit</button>
+  <div class="main-content">
+  <h2>🛤️ Cheminot LGW 🚂</h2>
+
+  <label for="selectLigne">Choisir une ligne :</label>
+  <select id="selectLigne" onchange="afficherTableau()">
+    <option value="ligne1">Ligne 1 – Saint Denis → Annesburg → Bacchus → Wallace → Riggs → Blackwater → Macfarlane Ranch → Armadillo</option>
+    <option value="ligne2">Ligne 2 – Armadillo → Macfarlane Ranch → Blackwater → Riggs → Wallace → Bacchus → Annesburg → Saint Denis</option>
+    <option value="ligne3">Ligne 3 – Annesburg → Saint Denis → Rhodes → Blackwater → Macfarlane Ranch → Armadillo → Benedict → Tumbleweed → Armadillo</option>
+    <option value="ligne4">Ligne 4 – Armadillo → Tumbleweed → Benedict → Armadillo → Macfarlane Ranch → Blackwater → Rhodes → Saint Denis → Annesburg</option>
+    <option value="ligne5">Ligne 5 – Saint Denis → Ferme de Emerald → Valentine → Riggs Station → Wallace Station → Bacchus (Wapiti) → Annesburg → Saint Denis</option>
+    <option value="ligne6">Ligne 6 – Saint Denis → Annesburg → Bacchus (Wapiti) → Wallace Station → Riggs Station → Valentine → Ferme de Emerald → Saint Denis</option>
+    <option value="ligne8">Ligne NA – Macfarlane Ranch → Armadillo → Benedict → Tumbleweed → Rathskeller Fork (Mine) Armadillo → Macfarlane Ranch</option>
+    <option value="ligne7">Express Armadillo → Saint Denis</option>
+    <option value="ligne8">Express Saint Denis → Armadillo</option>
+  </select>
+
+  <label for="heureDepart">Heure de départ (HH:MM) :</label>
+  <input type="time" id="heureDepart" value="08:00" onchange="afficherTableau()" />
+
+  <label for="pauseStandard">Temps de pause standard (minutes) :</label>
+  <input type="number" id="pauseStandard" value="3" min="0" max="30" onchange="afficherTableau()" />
+
+  <div id="resumeTrajet">
+    <h3>🕒 Tableau horaire détaillé :</h3>
+    <table id="tableauHoraires">
+      <thead>
+        <tr>
+          <th>Gare</th>
+          <th>Heure d'arrivée</th>
+          <th>Temps de pause (min)</th>
+          <th>Heure de départ</th>
+          <th>Temps vers gare suivante (min)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="copierTableau()">📎 Copier les horaires pour le tableau d'affichage</button>
+  </div>
+
+  <div id="heureActuelle"></div>
+  <div id="prochaineGareInfo"></div>
+
   <script>
     const btnModeNuit = document.getElementById('btnModeNuit');
     const body = document.body;
@@ -334,3 +391,11 @@ function copierTableau() {
       }
     }
   </script>
+ </div>
+<div id="popup" style="display:none; position: fixed; top: 20px; right: 20px; background: #a96d2c; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 1000;"></div>
+
+</body>
+</html>
+  <footer>
+    ⓒ 2025 - Conçu par <strong style="color: #7a5230;">Bill Anderson</strong> • Tous droits réservés.
+  </footer>
