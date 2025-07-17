@@ -1,0 +1,277 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Almendra SC', serif;
+}
+
+/* Fond général avec texture bois clair */
+body {
+  background: #f5f0e8 url('https://www.transparenttextures.com/patterns/wood-pattern.png') repeat;
+  color: #5b3a1a;
+  padding: 25px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* Nouveau : conteneur principal centré */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centre verticalement */
+  align-items: center;     /* centre horizontalement */
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+  background-color: #d2b48c;
+  color: #4a2c12;
+  padding: 18px 0;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.07em;
+  box-shadow: inset 0 2px 5px #b08952;
+}
+
+/* Bouton Mode Nuit */
+#btnModeNuit {
+  background-color: #cda45e;
+  color: #4a2c12;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 3px 6px #9f7e3a;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-bottom: 22px;
+  letter-spacing: 0.05em;
+  font-size: 1.1rem;
+}
+
+#btnModeNuit:hover {
+  background-color: #a57e3a;
+  color: #f9f5e7;
+}
+
+/* Titres */
+h2, h3 {
+  color: #8b5e1e;
+  text-shadow: 1px 1px 2px #f0eadfcc;
+  margin-bottom: 18px;
+}
+
+/* Label */
+label {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #79582a;
+  text-shadow: 1px 1px 1px #fff9e3cc;
+}
+
+/* Input, select */
+select, input[type="time"], input[type="number"] {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 14px;
+  border: 2.5px solid #b79453;
+  border-radius: 10px;
+  background-color: #fff9e3;
+  color: #4a2c12;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: inset 0 3px 6px #d4c294cc;
+  transition: border-color 0.3s ease;
+}
+
+select:focus, input[type="time"]:focus, input[type="number"]:focus {
+  border-color: #8b5e1e;
+  outline: none;
+  box-shadow: 0 0 8px #cda45eaa;
+}
+
+/* Tableau */
+table {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 22px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px #d1b273aa;
+  background: #fff9e3;
+  color: #5b3a1a;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+thead tr {
+  background-color: #cda45e;
+  color: #4a2c12;
+  text-shadow: 0 1px 2px #f0eadfaa;
+}
+
+thead th {
+  padding: 14px 18px;
+  border-bottom: 3px solid #a57e3a;
+  text-align: left;
+}
+
+tbody tr {
+  transition: background-color 0.3s ease;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #f9f4dd;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f0e8c7;
+}
+
+tbody tr:hover {
+  background-color: #d6c68e;
+  cursor: default;
+}
+
+tbody td {
+  padding: 14px 18px;
+}
+
+/* Input pause dans tableau */
+.inputPause {
+  width: 60px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 2px solid #b79453;
+  background-color: #fff9e3;
+  color: #4a2c12;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: inset 0 3px 6px #d4c294cc;
+  transition: border-color 0.3s ease;
+}
+
+.inputPause:focus {
+  border-color: #8b5e1e;
+  outline: none;
+  box-shadow: 0 0 8px #cda45eaa;
+}
+
+/* Prochaine gare surlignée */
+.prochaine-gare {
+  background-color: #8b5e1e !important;
+  color: #fff9e3 !important;
+  font-weight: 700;
+  box-shadow: 0 0 12px #cda45eaa;
+}
+
+/* Bouton copier horaires */
+button[onclick="copierTableau()"] {
+  margin-top: 20px;
+  padding: 12px 28px;
+  background-color: #8b5e1e;
+  color: #fff9e3;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px #b79453aa;
+  transition: background-color 0.3s ease;
+  letter-spacing: 0.05em;
+  font-size: 1.1rem;
+}
+
+button[onclick="copierTableau()"]:hover {
+  background-color: #a57e3a;
+}
+
+/* Infos heure actuelle et prochaine gare */
+#heureActuelle, #prochaineGareInfo {
+  margin-top: 28px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #79582a;
+  text-shadow: 1px 1px 1px #fff9e3cc;
+}
+
+/* Mode Nuit activé */
+body.mode-nuit {
+  background: #2f2b22;
+  color: #d6c68e;
+  background-image: none;
+}
+
+body.mode-nuit footer {
+  background-color: #453c30;
+  color: #bca869;
+  box-shadow: inset 0 2px 5px #5b4e2d;
+}
+
+body.mode-nuit #btnModeNuit {
+  background-color: #bca869;
+  color: #2f2b22;
+  box-shadow: 0 3px 6px #8b7e4a;
+}
+
+body.mode-nuit #btnModeNuit:hover {
+  background-color: #8b7e4a;
+  color: #f9f5e7;
+}
+
+body.mode-nuit table {
+  background-color: #453c30;
+  color: #d6c68e;
+  box-shadow: 0 6px 12px #5b4e2daa;
+}
+
+body.mode-nuit thead tr {
+  background-color: #bca869;
+  color: #2f2b22;
+}
+
+body.mode-nuit tbody tr:nth-child(odd) {
+  background-color: #5b4e2d;
+}
+
+body.mode-nuit tbody tr:nth-child(even) {
+  background-color: #4a4125;
+}
+
+body.mode-nuit tbody tr:hover {
+  background-color: #756b35;
+}
+
+body.mode-nuit .inputPause {
+  background-color: #5b4e2d;
+  color: #d6c68e;
+  border: 2px solid #bca869;
+}
+
+body.mode-nuit .inputPause:focus {
+  border-color: #8b7e4a;
+  box-shadow: 0 0 8px #bca869aa;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  body {
+    padding: 15px;
+    font-size: 15px;
+  }
+  select, input[type="time"], input[type="number"] {
+    max-width: 100%;
+  }
+  table {
+    font-size: 0.95rem;
+  }
+}
